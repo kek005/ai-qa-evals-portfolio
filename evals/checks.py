@@ -9,9 +9,20 @@ the limits of every signal they ship.
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, Iterable, Optional, Tuple
 
 Result = Tuple[bool, str]
+
+
+def matches_format(response: str, required_regex: str) -> Result:
+    """Format adherence: the WHOLE response must match the required structure (anchored fullmatch).
+
+    Guards against models that answer correctly but wrap it in preamble/markdown/extra text — which
+    breaks any programmatic consumer expecting a fixed shape.
+    """
+    ok = re.fullmatch(required_regex, response.strip(), re.IGNORECASE | re.DOTALL) is not None
+    return ok, ("matches required format" if ok else f"does not match required format: /{required_regex}/")
 
 
 def is_valid_json(text: str) -> Result:
